@@ -9,3 +9,6 @@ spec:
       env:
       - name: ALLOW_EMPTY_PASSWORD
         value: "yes"
+
+# Left off - crashloopbackoff with creating api deployment (I don't think I've created service yet) because
+# connection variables haven't been added (I think I connect via pgpool, since it acts as a loadbalancer - do I need pgclient?)

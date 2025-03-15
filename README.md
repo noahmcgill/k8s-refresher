@@ -67,3 +67,47 @@ Or, run from Docker. First, start docker, follow the above build instructions, a
 ```bash
 docker run --name api api:v1 -p 8000:8000
 ```
+
+## Deploy Kubernetes infrastructure via Minikube
+
+I referred to [this article](https://devopscube.com/deploy-postgresql-statefulset/) for deploying a high-availability PostgreSQL service. To deploy the infrastructure, apply the following config files:
+
+```bash
+cd infra
+kubectl apply -f postgres-config.yaml
+kubectl apply -f postgres-svc.yaml
+kubectl apply -f postgres-secret.yaml
+kubectl apply -f postgres-statefulset.yaml
+kubectl apply -f pgpool-secret.yaml
+kubectl apply -f pgpool-svc.yaml
+kubectl apply -f pgpool-deployment.yaml
+kubectl apply -f psql-client.yaml
+```
+
+I haven't set up any sort of PostgreSQL migration infrastructure for this project, so you'll need to shell into the pgclient pod and create the `item` table. First, access the psql shell:
+
+```bash
+kubectl exec -it pg-client -- /bin/bash
+kubectl get secret postgres-secrets -n database -o jsonpath="{.data.postgresql-password}" | base64 --decode
+PGPASSWORD=<password> psql -h pgpool-svc -p 5432 -U postgres
+```
+
+Then, create the database and table:
+
+```bash
+CREATE DATABASE k8s;
+\connect k8s
+CREATE TABLE item (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    age INT
+);
+```
+
+Finally, get the URL of the API service:
+
+```bash
+minikube service api-svc --url
+```
+
+With this command, Minikube provides a tunnel from your local machine to the NodePort service.
