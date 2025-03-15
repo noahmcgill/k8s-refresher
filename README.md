@@ -111,3 +111,9 @@ minikube service api-svc --url
 ```
 
 With this command, Minikube provides a tunnel from your local machine to the NodePort service.
+
+Run a curl command to test the API!
+
+```bash
+curl -XPOST -H "Content-type: application/json" -d '{"name":"Noah","age":27}' 'http://127.0.0.1:58578/api/v1/items'
+```
